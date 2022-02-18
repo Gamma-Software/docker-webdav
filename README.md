@@ -2,6 +2,11 @@
 
 * [`2.4`, `latest` (*2.4/Dockerfile*)](https://github.com/BytemarkHosting/docker-webdav/blob/master/2.4/Dockerfile)
 
+## Fork context
+This project is a fork of [`BytemarkHosting's webdav docker project`](https://github.com/BytemarkHosting/docker-webdav).
+My version is inspired by the [Linuxserver](https://github.com/linuxserver) project that add the PUID and PGID variables in the container and folder created with it.
+So this Docker image will allow you to keep the ownership of the files and folders from the container instance.
+See [Usage](#usage) for more information about the PUID and PGID variables.
 ## Quick reference
 
 This image runs an easily configurable WebDAV server with Apache.
@@ -34,6 +39,15 @@ docker run --restart always -v /srv/dav:/var/lib/dav \
 
 ```
 
+To avoid conflicts with the ownership of the shared folder with the container, you can use the PUID and PGID variables. This will allow you to keep the ownership of the `/var/lib/dav` folder from the container (where the data is stored):
+```
+docker run --restart always -v /srv/dav:/var/lib/dav \
+    -e AUTH_TYPE=Digest -e USERNAME=alice -e PASSWORD=secret1234 -e PUID:${USER} -e PGID:${USER} \
+    --publish 80:80 -d bytemark/webdav
+
+```
+Where the `${USER}` variable is replaced by the user.
+
 #### Via Docker Compose:
 
 ```
@@ -48,6 +62,8 @@ services:
       AUTH_TYPE: Digest
       USERNAME: alice
       PASSWORD: secret1234
+      PUID: 1000
+      PGID: 1000
     volumes:
       - /srv/dav:/var/lib/dav
 
@@ -104,4 +120,6 @@ All environment variables are optional. You probably want to at least specify `U
 * **`PASSWORD`**: Authenticate with this password (and the username above). This is ignored if you bind mount your own authentication file to `/user.passwd`.
 * **`ANONYMOUS_METHODS`**: Comma-separated list of HTTP request methods (eg, `GET,POST,OPTIONS,PROPFIND`). Clients can use any method you specify here without authentication. Set to `ALL` to disable authentication. The default is to disallow any anonymous access.
 * **`SSL_CERT`**: Set to `selfsigned` to generate a self-signed certificate and enable Apache's SSL module. If you specify `SERVER_NAMES`, the first domain is set as the Common Name.
+* **`PUID`**: Set the user ownership of the data
+* **`PGID`**: Set the group ownership of the data
 

@@ -98,9 +98,19 @@ if [ -e /privkey.pem ] && [ -e /cert.pem ]; then
         "$HTTPD_PREFIX/conf/sites-enabled"
 fi
 
+
+
+# Create the users
+PUID=${PUID:-911}
+PGID=${PGID:-911}
+
+groupmod -o -g "$PGID" abc
+usermod -o -u "$PUID" abc
+
 # Create directories for Dav data and lock database.
 [ ! -d "/var/lib/dav/data" ] && mkdir -p "/var/lib/dav/data"
 [ ! -e "/var/lib/dav/DavLock" ] && touch "/var/lib/dav/DavLock"
-chown -R www-data:www-data "/var/lib/dav"
+#chown -R www-data:www-data "/var/lib/dav"
+chown -R abc:abc "/var/lib/dav"
 
 exec "$@"

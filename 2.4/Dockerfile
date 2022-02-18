@@ -10,10 +10,13 @@ COPY conf/ conf/
 RUN set -ex; \
     # Create empty default DocumentRoot.
     mkdir -p "/var/www/html"; \
-    # Create directories for Dav data and lock database.
+    apk add --no-cache shadow; \
+    groupmod -g 1000 users; \
+    useradd -u 911 -U -d /config -s /bin/false abc; \
+    usermod -G users abc; \
     mkdir -p "/var/lib/dav/data"; \
     touch "/var/lib/dav/DavLock"; \
-    chown -R www-data:www-data "/var/lib/dav"; \
+    chown -R abc:abc "/var/lib/dav"; \
     \
     # Enable DAV modules.
     for i in dav dav_fs; do \
@@ -32,7 +35,8 @@ RUN set -ex; \
     \
     # Run httpd as "www-data" (instead of "daemon").
     for i in User Group; do \
-        sed -i -e "s|^$i .*|$i www-data|" "conf/httpd.conf"; \
+        #sed -i -e "s|^$i .*|$i www-data|" "conf/httpd.conf"; \
+        sed -i -e "s|^$i .*|$i abc|" "conf/httpd.conf"; \
     done; \
     \
     # Include enabled configs and sites.
